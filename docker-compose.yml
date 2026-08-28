@@ -1,0 +1,30 @@
+services:
+  mongodb:
+    image: mongo:8
+    container_name: nandini-vision-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: nandini_vision
+
+  api:
+    build: ./back
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017
+      MONGODB_DB: nandini_vision
+      APP_ENV: production
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@nandinistudio.demo}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      NOTIFY_MODE: ${NOTIFY_MODE:-mock}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+
+volumes:
+  mongo-data:
