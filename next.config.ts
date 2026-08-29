@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // The live preview proxies the dev server through a sandbox host
+  // (e.g. 3000-<sandbox>.e2b.app). Next.js dev blocks cross-origin
+  // dev resources (JS chunks, HMR, fonts) by default, which leaves
+  // the page un-hydrated — allow all e2b.app preview origins.
+  allowedDevOrigins: ["*.e2b.app", "*.sandbox.e2b.app"],
   images: {
     // Photography-first site; remote images (Unsplash placeholders for now)
     // will be served through the Next.js image optimizer.

@@ -25,6 +25,11 @@ export function ImageMedia({
   eager = false,
   fallbackAspect = "1 / 1",
 }: ImageMediaProps) {
+  // fill-mode images take their dimensions from the parent container
+  // (all call sites define aspect-ratio / height), never from the
+  // <img> itself — avoids 0-height parent/child sizing warnings.
+  void aspect;
+  void fallbackAspect;
   return (
     <Image
       src={src}
@@ -35,7 +40,6 @@ export function ImageMedia({
       loading={eager ? "eager" : "lazy"}
       className={`fit-image ${className}`}
       data-cursor={cursor}
-      style={{ aspectRatio: aspect ?? fallbackAspect }}
     />
   );
 }
