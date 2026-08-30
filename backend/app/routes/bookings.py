@@ -9,7 +9,6 @@ from app.models import BookingOut, BookingUpdate, BookingStatus
 from app.auth import get_current_admin
 from app.utils.email import send_booking_confirmation_email
 
-
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 
 
@@ -73,7 +72,6 @@ async def update_booking(
             detail="Invalid booking id",
         )
 
-    # Get the current booking before making any changes.
     current = await bookings.find_one({"_id": oid})
 
     if not current:
@@ -82,21 +80,18 @@ async def update_booking(
             detail="Booking not found",
         )
 
-    # Get only the fields that the admin actually changed.
     updates = {
         k: v
         for k, v in payload.model_dump(exclude_unset=True).items()
         if v is not None
     }
 
-    # MongoDB stores the date as an ISO string.
     if "date" in updates:
         updates["date"] = updates["date"].isoformat()
 
     target_date = updates.get("date", current["date"])
     target_status = updates.get("status", current["status"])
 
-    # Prevent two HOLD/CONFIRMED bookings on the same date.
     if target_status in (
         BookingStatus.CONFIRMED.value,
         BookingStatus.HOLD.value,
@@ -126,20 +121,16 @@ async def update_booking(
 
     updates["updated_at"] = datetime.now(timezone.utc)
 
-    # Send an email ONLY when the booking changes
-    # from a non-confirmed status to CONFIRMED.
     send_confirmation = (
         updates.get("status") == BookingStatus.CONFIRMED.value
         and current.get("status") != BookingStatus.CONFIRMED.value
     )
 
-    # Update the booking in MongoDB.
     await bookings.update_one(
         {"_id": oid},
         {"$set": updates},
     )
 
-    # Get the updated booking.
     doc = await bookings.find_one({"_id": oid})
 
     if not doc:
@@ -148,10 +139,8 @@ async def update_booking(
             detail="Booking not found after update",
         )
 
-    # Send confirmation email to the customer.
     if send_confirmation:
         email_result = await send_booking_confirmation_email(doc)
-
         print(
             f"[booking] confirmation email result: {email_result}"
         )
@@ -181,4 +170,3 @@ async def delete_booking(
         )
 
     return {"deleted": True}
-

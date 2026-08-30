@@ -1,6 +1,11 @@
 
 from __future__ import annotations
 
+import asyncio
+import smtplib
+import ssl
+from email.message import EmailMessage
+
 import httpx
 
 from app.config import settings
@@ -104,7 +109,7 @@ async def send_booking_confirmation_email(booking: dict) -> str:
         "Photography for the beautifully lived."
     )
 
-    if not settings.resend_api_key:
+    if not settings.smtp_email or not settings.smtp_app_password:
         print(
             "[booking-email:mock] would send ->",
             customer_email,
@@ -112,35 +117,42 @@ async def send_booking_confirmation_email(booking: dict) -> str:
         print("[booking-email:mock] subject ->", subject)
         return "mock"
 
+    def _send_via_gmail() -> None:
+        msg = EmailMessage()
+        msg["Subject"] = subject
+        msg["From"] = f"Nandini Vision <{settings.smtp_email}>"
+        msg["To"] = customer_email
+        msg.set_content(body)
+
+        context = ssl.create_default_context()
+
+        with smtplib.SMTP_SSL(
+            settings.smtp_host,
+            settings.smtp_port,
+            context=context,
+            timeout=10,
+        ) as server:
+            server.login(settings.smtp_email, settings.smtp_app_password)
+            server.send_message(msg)
+
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.post(
-                "https://api.resend.com/emails",
-                headers={
-                    "Authorization": f"Bearer {settings.resend_api_key}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "from": settings.email_from,
-                    "to": [customer_email],
-                    "subject": subject,
-                    "text": body,
-                },
-            )
+        # smtplib is blocking, so run it off the event loop.
+        await asyncio.to_thread(_send_via_gmail)
 
-            if response.status_code >= 400:
-                print(
-                    "[booking-email:failed]",
-                    response.status_code,
-                    response.text,
-                )
-                return "failed"
+        print(
+            "[booking-email:sent] confirmation ->",
+            customer_email,
+        )
+        return "sent"
 
-            print(
-                "[booking-email:sent] confirmation ->",
-                customer_email,
-            )
-            return "sent"
+    except smtplib.SMTPAuthenticationError as exc:
+        print(
+            "[booking-email:failed] Gmail auth rejected. "
+            "Check SMTP_EMAIL / SMTP_APP_PASSWORD "
+            "(must be a Gmail App Password, not the login password).",
+            str(exc),
+        )
+        return "failed"
 
     except Exception as exc:
         print(
@@ -149,4 +161,3 @@ async def send_booking_confirmation_email(booking: dict) -> str:
             str(exc),
         )
         return "failed"
-

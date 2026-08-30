@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     email_from: str = "Nandini Vision <hello@nandinistudio.demo>"
     owner_email: str = "owner@nandinistudio.demo"
 
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 465
+    smtp_email: str = ""
+    smtp_app_password: str = ""
+
     whatsapp_number: str = "919876543210"
 
     admin_email: str = "owner@nandinistudio.demo"
