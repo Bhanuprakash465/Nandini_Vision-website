@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      MONGODB_URI: mongodb://mongo:27017
+      MONGODB_DB_NAME: nandini_vision
+      FRONTEND_ORIGIN: http://localhost:3000
+      JWT_SECRET: replace-this-with-a-long-random-string
+      ADMIN_EMAIL: owner@nandinistudio.demo
+      ADMIN_PASSWORD: change-me-now
+    depends_on:
+      - mongo
+
+volumes:
+  mongo_data:
