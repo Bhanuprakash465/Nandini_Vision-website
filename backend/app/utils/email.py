@@ -1,6 +1,3 @@
-"""
-Email notification service using Resend.
-"""
 
 from __future__ import annotations
 
@@ -10,19 +7,11 @@ from app.config import settings
 
 
 async def send_owner_enquiry_email(enquiry: dict) -> str:
-    """
-    Send a new enquiry notification to the studio owner.
-
-    Returns:
-        "sent"   - email was successfully accepted by Resend
-        "mock"   - no Resend API key is configured
-        "failed" - Resend request failed
-    """
+    """Send a new enquiry notification to the studio owner."""
 
     subject = (
-        f"New Nandini Vision Enquiry — "
-        f"{enquiry['event_type']} — "
-        f"{enquiry['date']}"
+        f"Nandini Vision Enquiry - "
+        f"{enquiry['event_type']} - {enquiry['date']}"
     )
 
     body = (
@@ -41,10 +30,7 @@ async def send_owner_enquiry_email(enquiry: dict) -> str:
     )
 
     if not settings.resend_api_key:
-        print(
-            "[email:mock] would send ->",
-            settings.owner_email,
-        )
+        print("[email:mock] would send ->", settings.owner_email)
         print("[email:mock] subject ->", subject)
         return "mock"
 
@@ -53,9 +39,7 @@ async def send_owner_enquiry_email(enquiry: dict) -> str:
             response = await client.post(
                 "https://api.resend.com/emails",
                 headers={
-                    "Authorization": (
-                        f"Bearer {settings.resend_api_key}"
-                    ),
+                    "Authorization": f"Bearer {settings.resend_api_key}",
                     "Content-Type": "application/json",
                 },
                 json={
@@ -66,42 +50,40 @@ async def send_owner_enquiry_email(enquiry: dict) -> str:
                 },
             )
 
-        if response.status_code >= 400:
+            if response.status_code >= 400:
+                print(
+                    "[email:failed]",
+                    response.status_code,
+                    response.text,
+                )
+                return "failed"
+
             print(
-                "[email:failed]",
-                response.status_code,
-                response.text,
+                "[email:sent] owner enquiry ->",
+                settings.owner_email,
             )
-            return "failed"
-
-        print(
-            "[email:sent] owner enquiry ->",
-            settings.owner_email,
-        )
-
-        return "sent"
+            return "sent"
 
     except Exception as exc:
-        print("[email:failed]", exc)
+        print(
+            "[email:failed]",
+            type(exc).__name__,
+            str(exc),
+        )
         return "failed"
 
 
-async def send_booking_confirmation_email(
-    booking: dict,
-) -> str:
-    """
-    Send a booking confirmation email to the customer.
+async def send_booking_confirmation_email(booking: dict) -> str:
+    """Send booking confirmation email to the customer."""
 
-    Returns:
-        "sent"   - email was successfully accepted by Resend
-        "mock"   - no Resend API key is configured
-        "failed" - Resend request failed
-    """
+    customer_email = booking.get("email")
 
-    customer_email = booking["email"]
+    if not customer_email:
+        print("[booking-email:failed] Customer email is missing")
+        return "failed"
 
     subject = (
-        f"Nandini Vision — Booking Confirmed — "
+        f"Nandini Vision - Booking Confirmed - "
         f"{booking['date']}"
     )
 
@@ -109,15 +91,14 @@ async def send_booking_confirmation_email(
         f"Hi {booking['client_name']},\n\n"
         "Great news! Your booking with Nandini Vision "
         "has been confirmed.\n\n"
-        "BOOKING DETAILS\n"
+        "Booking Details\n"
         "-------------------------\n"
         f"Event: {booking['event_type']}\n"
         f"Date: {booking['date']}\n"
         f"Location: {booking['location']}\n"
         f"Guests: {booking.get('guest_count', 'N/A')}\n"
         f"Booking ID: {booking.get('enquiry_id', 'N/A')}\n\n"
-        "We look forward to being part of your "
-        "special occasion.\n\n"
+        "We look forward to being part of your special occasion.\n\n"
         "Thank you for choosing Nandini Vision.\n\n"
         "Nandini Vision\n"
         "Photography for the beautifully lived."
@@ -125,10 +106,10 @@ async def send_booking_confirmation_email(
 
     if not settings.resend_api_key:
         print(
-            "[email:mock] would send booking confirmation ->",
+            "[booking-email:mock] would send ->",
             customer_email,
         )
-        print("[email:mock] subject ->", subject)
+        print("[booking-email:mock] subject ->", subject)
         return "mock"
 
     try:
@@ -136,9 +117,7 @@ async def send_booking_confirmation_email(
             response = await client.post(
                 "https://api.resend.com/emails",
                 headers={
-                    "Authorization": (
-                        f"Bearer {settings.resend_api_key}"
-                    ),
+                    "Authorization": f"Bearer {settings.resend_api_key}",
                     "Content-Type": "application/json",
                 },
                 json={
@@ -149,21 +128,25 @@ async def send_booking_confirmation_email(
                 },
             )
 
-        if response.status_code >= 400:
+            if response.status_code >= 400:
+                print(
+                    "[booking-email:failed]",
+                    response.status_code,
+                    response.text,
+                )
+                return "failed"
+
             print(
-                "[email:failed]",
-                response.status_code,
-                response.text,
+                "[booking-email:sent] confirmation ->",
+                customer_email,
             )
-            return "failed"
-
-        print(
-            "[email:sent] booking confirmation ->",
-            customer_email,
-        )
-
-        return "sent"
+            return "sent"
 
     except Exception as exc:
-        print("[email:failed]", exc)
+        print(
+            "[booking-email:failed]",
+            type(exc).__name__,
+            str(exc),
+        )
         return "failed"
+
