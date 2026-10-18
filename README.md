@@ -44,14 +44,38 @@ ADMIN_EMAIL / ADMIN_PASSWORD you set in `backend/.env`.
 ## What's real vs. simulated
 
 - **Availability checker, consultation form, admin dashboard, notifications** all hit the
-  real FastAPI + MongoDB backend — nothing is hardcoded.
-- **Email**: runs in mock mode (logs instead of sending) until you set `RESEND_API_KEY` in
-  `backend/.env`. Every API response is explicit about whether delivery was real or mocked.
-- **Imagery**: every photo is a labeled placeholder gradient block (per the brief's
-  requirement to never fake real photography). Swap them out via `frontend/lib/data.ts` and
-  the `<Placeholder>` component usages once real Nandini Vision photos exist.
-- **3D effects, full preloader/custom cursor, calendar month view, real deployment**: not
-  built in this pass — see `PROJECT_PROGRESS.md` for the honest list.
+  real FastAPI + MongoDB backend. Availability is decided by **date only**: a date is
+  reported as open only when no PENDING, HOLD or CONFIRMED booking exists for it.
+  Event type and location are optional and only pre-fill the enquiry form.
+- **Owner notification email** (new enquiry) uses Resend (`RESEND_API_KEY`, `EMAIL_FROM`,
+  `OWNER_EMAIL`). Without a key it runs in mock mode and says so.
+- **Customer confirmation email** (sent once, when an admin changes a booking to CONFIRMED)
+  uses Gmail SMTP (`SMTP_EMAIL`, `SMTP_APP_PASSWORD`). Resend's `onboarding@resend.dev`
+  sender can only deliver to the Resend account owner, so it cannot email customers until a
+  domain is verified. The admin dashboard reports whether the email was really sent,
+  not configured, or failed.
+- **Imagery**: every photograph is a labelled placeholder until real files are added. See
+  `frontend/public/images/README.md`.
+- **Contact details** (email, Instagram, WhatsApp) and the showreel come from
+  `NEXT_PUBLIC_*` variables and are hidden when unset. See `frontend/.env.example`.
+- **Testimonials** in `frontend/lib/data.ts` are sample copy and are not shown until each is
+  marked `verified: true` by someone with permission to publish it.
+
+## Tests and checks
+
+```bash
+# Backend (in-memory MongoDB, no network, no real email)
+cd backend
+pip install -r requirements-dev.txt
+python -m pytest
+
+# Frontend
+cd frontend
+npm ci
+npx tsc --noEmit
+npm run lint
+npm run build
+```
 
 ## Deploying for real
 

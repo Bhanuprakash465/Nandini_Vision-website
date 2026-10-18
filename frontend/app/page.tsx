@@ -1,203 +1,233 @@
 import Link from "next/link";
-import Placeholder from "@/components/Placeholder";
+import Photo from "@/components/Photo";
 import Reveal from "@/components/Reveal";
-import TestimonialsRotator from "@/components/TestimonialsRotator";
-import AvailabilityPreview from "@/components/AvailabilityPreview";
-import { projects, services, collections, site } from "@/lib/data";
+import AvailabilityChecker from "@/components/AvailabilityChecker";
+import { Arrow } from "@/components/Arrow";
+import { projects, services, collections, site, verifiedTestimonials } from "@/lib/data";
+
+const storyLayout = [
+  "md:col-span-7",
+  "md:col-span-5 md:mt-28",
+  "md:col-span-5 md:-mt-8",
+  "md:col-span-7 md:mt-8",
+];
+const storyAspect = ["aspect-[4/3] md:aspect-[7/5]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[4/3] md:aspect-[7/5]"];
 
 export default function Home() {
+  const filmService = services.find((s) => s.title.startsWith("Videography"));
+
   return (
     <>
-      {/* HERO */}
-      <section data-testid="hero-section" className="relative h-[100svh] flex flex-col justify-end px-6 md:px-12 pb-16">
-        <Placeholder tone="maroon" label="TEMPORARY PLACEHOLDER — South Indian bridal portrait" className="absolute inset-0 -z-20" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-ink/15 via-ink/5 to-ink/70" />
-        <div className="text-[11px] uppercase tracking-[0.28em] text-bone/85 mb-4">{site.location.toUpperCase().replace(", ", " · ")}</div>
-        <h1 className="font-display text-bone text-5xl md:text-8xl font-medium leading-[1.02] max-w-4xl">
-          {site.headline}
-        </h1>
-        <p className="font-display italic text-bone/85 text-lg md:text-2xl mt-5">{site.tagline}</p>
-        <div className="flex gap-4 mt-11 flex-wrap">
-          <Link href="/consultation" className="border border-gold bg-gold text-ink px-8 py-4 text-[11px] uppercase tracking-[0.16em] font-semibold">
-            Book Your Date
-          </Link>
-          <Link href="/work" className="border border-bone text-bone px-8 py-4 text-[11px] uppercase tracking-[0.16em] font-semibold hover:bg-bone hover:text-ink transition-colors">
-            View Our Stories
-          </Link>
+      {/* HERO — the one memorable moment: headline rising in front of a cobalt-framed portrait */}
+      <section
+        data-testid="hero-section"
+        className="on-dark relative overflow-hidden bg-black text-white lg:min-h-[calc(100svh-var(--header-h))]"
+      >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_85%_35%,rgba(44,52,128,0.55),transparent_70%)]" />
+        <div className="page-pad relative grid items-center gap-12 pb-16 pt-10 lg:min-h-[calc(100svh-var(--header-h))] lg:grid-cols-12 lg:gap-8 lg:py-16">
+          <div className="order-2 lg:order-1 lg:col-span-7">
+            <p className="hero-fade mb-8 text-[15px] text-white/70">Wedding photography and films · {site.location}</p>
+            <h1 className="font-display text-[clamp(3.1rem,8.4vw,8rem)] font-normal leading-[0.96] tracking-tight">
+              <span className="hero-line"><span>Photography</span></span>
+              <span className="hero-line"><span>for the</span></span>
+              <span className="hero-line"><span className="italic text-cobalt-light">beautifully lived.</span></span>
+            </h1>
+            <p className="hero-fade mt-8 max-w-md font-display text-xl italic text-white/75 md:text-2xl">{site.tagline}</p>
+            <div className="hero-fade mt-10 flex flex-wrap gap-4">
+              <Link href="/consultation" className="btn-cobalt">Book your date</Link>
+              <Link href="/work" className="btn-ghost-light">View our stories</Link>
+            </div>
+          </div>
+
+          <div className="order-1 lg:order-2 lg:col-span-5">
+            <div className="relative mx-auto ml-0 aspect-[4/3] w-[calc(100%-14px)] sm:aspect-[4/3.4] lg:ml-auto lg:aspect-[4/5] lg:w-[calc(100%-24px)]">
+              <div aria-hidden="true" className="absolute inset-0 translate-x-3.5 translate-y-3.5 bg-cobalt lg:translate-x-6 lg:translate-y-6" />
+              <div className="absolute inset-0 overflow-hidden">
+                <Photo
+                  src={projects[0].image}
+                  tone="cobalt"
+                  alt="Featured wedding portrait"
+                  label="Featured portrait — photograph to be supplied"
+                  priority
+                  sizes="(min-width: 1024px) 40vw, 100vw"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* SELECTED STORIES */}
-      <section id="stories" className="pt-32 pb-24 md:pt-40" data-testid="selected-stories">
-        <Reveal className="flex flex-wrap justify-between items-end gap-6 px-6 md:px-12 mb-16">
-          <h2 className="font-display text-4xl md:text-6xl font-medium">Selected<br />Stories</h2>
-          <p className="max-w-xs text-greige text-sm leading-relaxed">
-            Four weddings, four landscapes of Andhra Pradesh — from riverbanks to temple courtyards.
+      <section id="stories" className="page-pad pb-28 pt-28 md:pb-36 md:pt-40" data-testid="selected-stories">
+        <Reveal className="mb-16 flex flex-wrap items-end justify-between gap-6">
+          <h2 className="font-display text-5xl font-normal leading-none md:text-7xl">Selected stories</h2>
+          <p className="max-w-xs text-[15px] leading-relaxed text-black/65">
+            Weddings and celebrations from across Andhra Pradesh, from riverbanks to temple courtyards.
           </p>
         </Reveal>
-        <div className="px-6 md:px-12 grid grid-cols-1 md:grid-cols-12 gap-5">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-14 md:grid-cols-12">
           {projects.map((p, idx) => (
-            <Reveal
-              key={p.slug}
-              delay={idx * 80}
-              className={
-                idx === 0
-                  ? "md:col-span-7 h-[420px] md:h-[640px]"
-                  : idx === 1
-                  ? "md:col-span-5 h-[420px] md:h-[640px] md:mt-24"
-                  : idx === 2
-                  ? "md:col-span-5 h-[380px] md:h-[460px] md:mt-10"
-                  : "md:col-span-7 h-[380px] md:h-[460px]"
-              }
-            >
-              <Link href={`/work/${p.slug}`} className="group block h-full" data-testid={`story-${p.slug}`}>
-                <div className="h-[85%] overflow-hidden">
-                  <Placeholder tone={p.cover} className="h-full w-full transition-transform duration-[1.1s] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-105" />
+            <Reveal key={p.slug} className={storyLayout[idx % storyLayout.length]}>
+              <Link href={`/work/${p.slug}`} className="group block" data-testid={`story-${p.slug}`}>
+                <div className={`relative overflow-hidden ${storyAspect[idx % storyAspect.length]}`}>
+                  <Photo
+                    src={p.image}
+                    tone={p.cover}
+                    alt={`${p.title}, ${p.category} in ${p.location}`}
+                    className="transition-transform duration-[1.2s] ease-[var(--ease-out)] group-hover:scale-[1.03]"
+                  />
+                  <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-cobalt-light transition-transform duration-500 group-hover:scale-x-100" />
                 </div>
-                <div className="flex justify-between items-baseline mt-4">
-                  <h3 className="text-xl font-medium">{p.title}</h3>
-                  <span className="text-[11px] uppercase tracking-[0.1em] text-greige">
-                    {p.category} · {p.location} · {p.year}
+                <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                  <h3 className="font-display text-3xl transition-colors group-hover:text-cobalt">{p.title}</h3>
+                  <span className="text-[15px] text-black/60">
+                    {p.category}, {p.location}, {p.year}
                   </span>
                 </div>
               </Link>
             </Reveal>
           ))}
         </div>
+        <div className="mt-16">
+          <Link href="/work" className="link-line text-[15px] font-medium">See the full archive</Link>
+        </div>
       </section>
 
       {/* STUDIO STATEMENT */}
-      <section className="bg-ink text-bone text-center px-6 md:px-12 py-40" data-testid="studio-statement">
-        <Reveal>
-          <div className="text-[11px] uppercase tracking-[0.2em] text-bone/50 mb-6">Studio Philosophy</div>
-          <h2 className="font-display text-3xl md:text-6xl leading-tight max-w-4xl mx-auto">
-            We don&rsquo;t photograph <em className="text-gold not-italic font-normal italic">what happened.</em>
-            <br />
-            We photograph <em className="text-gold not-italic font-normal italic">how it felt.</em>
-          </h2>
-          <p className="max-w-lg mx-auto mt-8 text-bone/65 text-sm leading-loose">
-            Every ritual, every glance held a second too long, every hand reaching for another — these are not
-            moments we stage. They are moments we wait for, in the quiet space between frames.
-          </p>
-        </Reveal>
-      </section>
-
-      {/* SERVICES PREVIEW */}
-      <section className="px-6 md:px-12 py-32" data-testid="services-preview">
-        <Reveal className="mb-10">
-          <h2 className="font-display text-4xl md:text-6xl font-medium">Services</h2>
-        </Reveal>
-        <div>
-          {services.slice(0, 6).map((s, idx) => (
-            <Reveal key={s.title} delay={idx * 50}>
-              <Link
-                href="/services"
-                className="group flex items-center gap-6 py-8 border-t border-ink/10 last:border-b hover:bg-maroon/5 hover:pl-4 transition-all duration-500"
-              >
-                <span className="text-xs text-greige w-10">{String(idx + 1).padStart(2, "0")}</span>
-                <h3 className="flex-1 font-display text-2xl md:text-4xl font-medium group-hover:text-maroon group-hover:translate-x-1.5 transition-all duration-500">
-                  {s.title}
-                </h3>
-                <span className="text-xl text-greige group-hover:text-maroon group-hover:translate-x-2 transition-all duration-300">→</span>
-              </Link>
-            </Reveal>
-          ))}
+      <section className="on-dark relative overflow-hidden bg-[image:var(--gradient-night)] text-white" data-testid="studio-statement">
+        <div className="page-pad py-32 md:py-48">
+          <Reveal className="max-w-5xl">
+            <h2 className="font-display text-4xl font-normal leading-[1.08] md:text-7xl">
+              We don&rsquo;t photograph <em className="text-cobalt-light">what happened.</em>
+              <br />
+              We photograph <em className="text-cobalt-light">how it felt.</em>
+            </h2>
+            <p className="mt-10 max-w-lg text-[17px] leading-relaxed text-white/75">
+              Every ritual, every glance held a second too long, every hand reaching for another. These are not
+              moments we stage. They are moments we wait for, in the quiet space between frames.
+            </p>
+            <Link href="/about" className="link-line mt-10 text-[15px] font-medium">About the studio</Link>
+          </Reveal>
         </div>
-        <Reveal className="mt-10">
-          <Link href="/services" className="text-xs uppercase tracking-[0.16em] border-b border-ink pb-1">
-            View all services →
-          </Link>
-        </Reveal>
       </section>
 
-      {/* SHOWREEL */}
-      <section className="px-6 md:px-12 pb-32" data-testid="cinematic-showreel">
-        <Reveal>
-          <div className="relative h-[78vh] max-h-[720px] bg-ink flex items-center justify-center overflow-hidden">
-            <Placeholder tone="maroon" label="TEMPORARY PLACEHOLDER — showreel poster frame" className="absolute inset-0 opacity-55" />
-            <div className="relative z-10 text-center text-bone">
-              <div className="text-[11px] uppercase tracking-[0.2em] text-gold mb-4">The Showreel</div>
-              <h3 className="font-display text-3xl md:text-5xl">Stories in motion, 2023–2024</h3>
-              <button
-                aria-label="Play showreel"
-                className="mt-8 w-20 h-20 rounded-full border border-bone/50 flex items-center justify-center mx-auto hover:scale-105 hover:bg-bone/10 transition-all"
-              >
-                ▶
-              </button>
-            </div>
+      {/* SERVICES */}
+      <section className="page-pad grid gap-12 py-28 md:py-40 lg:grid-cols-12" data-testid="services-preview">
+        <Reveal className="lg:col-span-4">
+          <div className="lg:sticky lg:top-32">
+            <h2 className="font-display text-5xl font-normal leading-none md:text-7xl">Services</h2>
+            <p className="mt-6 max-w-xs text-[15px] leading-relaxed text-black/65">
+              From a single afternoon to a multi-day wedding, covered with the same quiet attention.
+            </p>
+            <Link href="/services" className="link-line mt-8 text-[15px] font-medium">All services</Link>
           </div>
         </Reveal>
+        <ul className="lg:col-span-8">
+          {services.slice(0, 6).map((s) => (
+            <li key={s.title} className="border-t border-black/15 last:border-b">
+              <Link
+                href={`/consultation?event=${encodeURIComponent(s.eventType)}`}
+                className="group flex items-center justify-between gap-6 px-0 py-7 transition-all duration-500 hover:bg-cobalt hover:px-6 hover:text-white"
+              >
+                <span>
+                  <span className="block font-display text-2xl md:text-4xl">{s.title}</span>
+                  <span className="mt-2 block max-w-md text-[15px] text-black/60 transition-colors group-hover:text-white/80">{s.desc}</span>
+                </span>
+                <Arrow className="h-6 w-6 shrink-0 transition-transform duration-500 group-hover:translate-x-1" />
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="px-6 md:px-12 pb-32">
-        <TestimonialsRotator />
+      {/* FILMS */}
+      <section className="on-dark bg-black text-white" data-testid="cinematic-showreel">
+        <div className="page-pad grid items-center gap-12 py-24 md:py-36 lg:grid-cols-12">
+          <Reveal className="lg:col-span-5">
+            <h2 className="font-display text-5xl font-normal leading-none md:text-7xl">Films</h2>
+            <p className="mt-6 max-w-sm text-[17px] leading-relaxed text-white/75">
+              {filmService?.desc} Every film is cut to the rhythm of the day it records.
+            </p>
+            <Link href="/consultation?event=Wedding" className="btn-cobalt mt-10">Ask about wedding films</Link>
+          </Reveal>
+          <Reveal className="lg:col-span-7">
+            <div className="relative aspect-video overflow-hidden bg-black">
+              {site.showreelSrc ? (
+                <video
+                  className="absolute inset-0 h-full w-full object-cover"
+                  controls
+                  preload="none"
+                  playsInline
+                  poster={site.showreelPoster}
+                  aria-label="Nandini Vision showreel"
+                >
+                  <source src={site.showreelSrc} />
+                </video>
+              ) : (
+                <Photo tone="cobalt" alt="Wedding film frame" label="Showreel not yet uploaded" sizes="(min-width: 1024px) 58vw, 100vw" />
+              )}
+            </div>
+          </Reveal>
+        </div>
       </section>
+
+      {/* TESTIMONIALS — only genuine, approved quotes are ever rendered */}
+      {verifiedTestimonials.length > 0 && (
+        <section className="page-pad py-28 md:py-40" data-testid="testimonials" aria-labelledby="kind-words">
+          <h2 id="kind-words" className="mb-14 font-display text-5xl font-normal md:text-7xl">Kind words</h2>
+          <div className="grid gap-12 md:grid-cols-3">
+            {verifiedTestimonials.map((t) => (
+              <figure key={t.who} className="border-t-2 border-cobalt pt-6">
+                <blockquote className="font-display text-2xl italic leading-snug">&ldquo;{t.quote}&rdquo;</blockquote>
+                <figcaption className="mt-5 text-[15px] text-black/65">{t.who}, {t.event}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* COLLECTIONS */}
-      <section className="px-6 md:px-12 pb-32" data-testid="collections">
-        <Reveal className="mb-10">
-          <h2 className="font-display text-4xl md:text-6xl font-medium">Collections</h2>
-          <p className="text-greige text-sm mt-3 max-w-md">
-            Three ways to work with us — every collection is tailored, never templated.
+      <section className="page-pad pb-28 pt-8 md:pb-40" data-testid="collections">
+        <Reveal className="mb-14 max-w-xl">
+          <h2 className="font-display text-5xl font-normal leading-none md:text-7xl">Collections</h2>
+          <p className="mt-6 text-[15px] leading-relaxed text-black/65">
+            Three ways to work with us. Every collection is shaped around your day, never templated.
           </p>
         </Reveal>
-        <div className="grid md:grid-cols-3 gap-px bg-ink/10">
-          {collections.map((c, idx) => (
-            <Reveal key={c.name} delay={idx * 80}>
-              <div className="group bg-bone hover:bg-ink hover:text-bone transition-colors duration-500 p-10 min-h-[380px] flex flex-col justify-between">
-                <span className="text-[11px] uppercase tracking-[0.2em] text-greige">
-                  {["I.", "II.", "III."][idx]}
-                </span>
-                <div>
-                  <h3 className="font-display text-2xl mt-6 mb-3">{c.name}</h3>
-                  <p className="text-sm text-greige leading-relaxed mb-8">{c.desc}</p>
-                  <Link
-                    href="/consultation"
-                    className="inline-block border border-current text-[11px] uppercase tracking-[0.14em] px-5 py-3 group-hover:border-gold group-hover:text-gold"
-                  >
-                    Request the Collection
-                  </Link>
-                </div>
-              </div>
+        <div className="grid border-t border-black/15 md:grid-cols-3">
+          {collections.map((c) => (
+            <Reveal key={c.name} className="group border-b border-black/15 py-10 transition-colors duration-500 hover:bg-cobalt hover:text-white md:border-b-0 md:border-l md:px-8 md:first:border-l-0 md:first:pl-0 md:hover:first:pl-8">
+              <h3 className="font-display text-4xl">{c.name}</h3>
+              <p className="mb-10 mt-4 max-w-xs text-[15px] leading-relaxed text-black/65 transition-colors group-hover:text-white/80">{c.desc}</p>
+              <Link
+                href={`/consultation?collection=${encodeURIComponent(c.name)}`}
+                className="link-line text-[15px] font-medium"
+              >
+                Request the {c.name} collection
+              </Link>
             </Reveal>
           ))}
         </div>
       </section>
 
       {/* AVAILABILITY */}
-      <section id="availability-preview" className="bg-ink text-bone px-6 md:px-12 py-32">
-        <AvailabilityPreview />
+      <section id="availability-preview" className="on-dark bg-[image:var(--gradient-dusk)] text-white">
+        <div className="page-pad py-28 md:py-40">
+          <AvailabilityChecker />
+        </div>
       </section>
 
       {/* CONSULTATION CTA */}
-      <section className="px-6 md:px-12 py-40 text-center">
-        <Reveal>
-          <div className="text-[11px] uppercase tracking-[0.2em] text-greige mb-6">Begin the Story</div>
-          <h2 className="font-display text-4xl md:text-7xl leading-tight max-w-3xl mx-auto">
-            Let&rsquo;s talk about your day — however it&rsquo;s meant to unfold.
+      <section className="page-pad py-32 md:py-48">
+        <Reveal className="max-w-4xl">
+          <h2 className="font-display text-5xl font-normal leading-[1.05] md:text-8xl">
+            Let&rsquo;s talk about your day, however it&rsquo;s meant to unfold.
           </h2>
-          <div className="flex justify-center gap-4 mt-11 flex-wrap">
-            <Link href="/consultation" className="border border-ink px-8 py-4 text-[11px] uppercase tracking-[0.16em] font-semibold hover:bg-maroon hover:border-maroon hover:text-bone transition-colors">
-              Book a Consultation
-            </Link>
+          <div className="mt-12 flex flex-wrap gap-4">
+            <Link href="/consultation" className="btn-cobalt-on-light">Book a consultation</Link>
+            <Link href="/work" className="btn-ghost-dark">Browse the work</Link>
           </div>
         </Reveal>
-      </section>
-
-      {/* INSTAGRAM */}
-      <section className="px-6 md:px-12 pb-32" data-testid="instagram-section">
-        <Reveal className="mb-8">
-          <h2 className="font-display text-4xl md:text-6xl font-medium">Follow the Stories</h2>
-          <p className="text-greige text-sm mt-2">{site.instagram}</p>
-        </Reveal>
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
-          {(["maroon", "gold", "bone", "maroon", "gold"] as const).map((tone, idx) => (
-            <div key={idx} className="aspect-square overflow-hidden group">
-              <Placeholder tone={tone} label="PLACEHOLDER" className="h-full w-full transition-transform duration-500 group-hover:scale-110" />
-            </div>
-          ))}
-        </div>
       </section>
     </>
   );

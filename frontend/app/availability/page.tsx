@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
-import AvailabilityPreview from "@/components/AvailabilityPreview";
+import AvailabilityChecker from "@/components/AvailabilityChecker";
 
 export const metadata: Metadata = {
   title: "Availability",
-  description: "Check real-time availability for your wedding, event or shoot date with Nandini Vision.",
+  description: "Check whether your wedding, event or shoot date is open with Nandini Vision.",
+  alternates: { canonical: "/availability" },
 };
 
 export default function AvailabilityPage() {
   return (
-    <section className="bg-ink text-bone px-6 md:px-12 pt-40 pb-32 min-h-screen">
-      <AvailabilityPreview />
+    <section className="on-dark min-h-[calc(100svh-var(--header-h))] bg-[image:var(--gradient-dusk)] text-white">
+      <div className="page-pad py-24 md:py-36">
+        <h1 className="sr-only">Check availability</h1>
+        <AvailabilityChecker />
+      </div>
     </section>
   );
 }

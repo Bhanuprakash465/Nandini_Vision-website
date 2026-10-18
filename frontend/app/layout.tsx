@@ -1,53 +1,61 @@
-import type { Metadata } from "next";
-import { Playfair_Display, Manrope } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import "@fontsource-variable/bodoni-moda/opsz.css";
+import "@fontsource-variable/bodoni-moda/opsz-italic.css";
+import "@fontsource-variable/instrument-sans/wght.css";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import { site } from "@/lib/data";
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-  style: ["normal", "italic"],
-  display: "swap",
-});
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
+const title = "Nandini Vision — Photography for the beautifully lived.";
+const description =
+  "Nandini Vision is a wedding photography and cinematic film studio based in Andhra Pradesh, serving clients across India and worldwide.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://nandinivision.demo"),
-  title: {
-    default: "Nandini Vision — Photography for the beautifully lived.",
-    template: "%s — Nandini Vision",
-  },
-  description:
-    "Nandini Vision is a premium wedding photography and cinematic film studio based in Andhra Pradesh, serving clients across India and worldwide.",
+  metadataBase: new URL(site.url),
+  title: { default: title, template: "%s — Nandini Vision" },
+  description,
+  applicationName: "Nandini Vision",
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Nandini Vision — Photography for the beautifully lived.",
+    title,
     description: "Wedding photography, cinematic films and visual stories from South India and beyond.",
+    siteName: "Nandini Vision",
     locale: "en_IN",
     type: "website",
+    url: "/",
   },
+  twitter: { card: "summary_large_image", title, description },
   robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: "Nandini Vision",
+  description: "Wedding photography and cinematic film studio in Andhra Pradesh, India.",
+  url: site.url,
+  areaServed: "IN",
+  address: { "@type": "PostalAddress", addressRegion: "Andhra Pradesh", addressCountry: "IN" },
+  ...(site.instagramHandle ? { sameAs: [`https://instagram.com/${site.instagramHandle}`] } : {}),
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${playfair.variable} ${manrope.variable}`}>
+    <html lang="en">
       <body className="font-body antialiased">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "LocalBusiness",
-              name: "Nandini Vision",
-              description: "Premium wedding photography and cinematic film studio in Andhra Pradesh, India.",
-              areaServed: "IN",
-              address: { "@type": "PostalAddress", addressRegion: "Andhra Pradesh", addressCountry: "IN" },
-            }),
-          }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
         <Nav />
-        <main>{children}</main>
+        <main id="main">{children}</main>
         <Footer />
       </body>
     </html>

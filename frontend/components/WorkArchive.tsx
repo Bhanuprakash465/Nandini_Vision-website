@@ -1,62 +1,69 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import Placeholder from "@/components/Placeholder";
-import Reveal from "@/components/Reveal";
+import Photo from "@/components/Photo";
 import { projects, workFilters } from "@/lib/data";
 
-const categoryMap: Record<string, string[]> = {
-  All: [],
-  Weddings: ["Wedding"],
-  "Pre-Wedding": ["Pre-Wedding"],
-  Events: ["Celebration"],
-  Family: [],
-  "Baby & Maternity": [],
-  Fashion: [],
-  Corporate: [],
-  Videography: [],
-  Drone: [],
-  Other: [],
-};
+const spans = ["md:col-span-7", "md:col-span-5 md:mt-24", "md:col-span-5", "md:col-span-7 md:mt-12"];
+const aspects = ["aspect-[7/5]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[7/5]"];
 
 export default function WorkArchive() {
   const [active, setActive] = useState("All");
-  const filtered =
-    active === "All" ? projects : projects.filter((p) => (categoryMap[active] || []).includes(p.category));
+  const filtered = active === "All" ? projects : projects.filter((p) => p.category === active);
 
   return (
     <div>
-      <div className="flex flex-wrap gap-x-6 gap-y-3 mb-14">
-        {workFilters.map((f) => (
-          <button
-            key={f}
-            onClick={() => setActive(f)}
-            className={`text-xs uppercase tracking-[0.14em] pb-1 border-b-2 transition-colors ${
-              active === f ? "border-maroon text-maroon" : "border-transparent text-greige hover:text-ink"
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+      <div role="group" aria-label="Filter stories by category" className="mb-6 flex flex-wrap gap-3">
+        {workFilters.map((f) => {
+          const on = active === f;
+          return (
+            <button
+              key={f}
+              type="button"
+              onClick={() => setActive(f)}
+              aria-pressed={on}
+              className={`min-h-[44px] border px-5 text-[15px] transition-colors duration-300 ${
+                on
+                  ? "border-cobalt bg-cobalt text-white"
+                  : "border-black/30 text-black hover:border-cobalt hover:text-cobalt"
+              }`}
+            >
+              {f}
+            </button>
+          );
+        })}
       </div>
-      <div className="grid md:grid-cols-2 gap-10">
+      <p className="mb-12 text-sm text-black/60" role="status" aria-live="polite">
+        {filtered.length} {filtered.length === 1 ? "story" : "stories"}
+        {active === "All" ? "" : ` in ${active}`}
+      </p>
+
+      <div className="grid gap-x-6 gap-y-14 md:grid-cols-12">
         {filtered.length === 0 && (
-          <p className="text-greige text-sm col-span-2">No stories in this category yet — check back soon.</p>
+          <p className="text-[17px] text-black/70 md:col-span-12">
+            There are no stories in this category yet. <button type="button" className="link-line font-medium" onClick={() => setActive("All")}>Show all stories</button>
+          </p>
         )}
         {filtered.map((p, idx) => (
-          <Reveal key={p.slug} delay={idx * 60}>
+          <article key={p.slug} className={spans[idx % spans.length]}>
             <Link href={`/work/${p.slug}`} className="group block">
-              <div className="h-[420px] overflow-hidden">
-                <Placeholder tone={p.cover} className="h-full w-full transition-transform duration-700 group-hover:scale-105" />
+              <div className={`relative overflow-hidden ${aspects[idx % aspects.length]}`}>
+                <Photo
+                  src={p.image}
+                  tone={p.cover}
+                  alt={`${p.title}, ${p.category} in ${p.location}`}
+                  className="transition-transform duration-[1.2s] ease-[var(--ease-out)] group-hover:scale-[1.03]"
+                />
+                <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-cobalt-light transition-transform duration-500 group-hover:scale-x-100" />
               </div>
-              <div className="flex justify-between items-baseline mt-4">
-                <h3 className="text-xl font-medium">{p.title}</h3>
-                <span className="text-[11px] uppercase tracking-[0.1em] text-greige">
-                  {p.category} · {p.location} · {p.year}
+              <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                <h2 className="font-display text-3xl transition-colors group-hover:text-cobalt">{p.title}</h2>
+                <span className="text-[15px] text-black/60">
+                  {p.category}, {p.location}, {p.year}
                 </span>
               </div>
             </Link>
-          </Reveal>
+          </article>
         ))}
       </div>
     </div>

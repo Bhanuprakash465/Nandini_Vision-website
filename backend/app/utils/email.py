@@ -11,6 +11,14 @@ import httpx
 from app.config import settings
 
 
+def mask_email(address: str) -> str:
+    """j***@example.com — keeps logs useful without storing customers' full addresses."""
+    local, _, domain = (address or "").partition("@")
+    if not domain:
+        return "***"
+    return f"{local[:1]}***@{domain}"
+
+
 async def send_owner_enquiry_email(enquiry: dict) -> str:
     """Send a new enquiry notification to the studio owner."""
 
@@ -112,7 +120,7 @@ async def send_booking_confirmation_email(booking: dict) -> str:
     if not settings.smtp_email or not settings.smtp_app_password:
         print(
             "[booking-email:mock] would send ->",
-            customer_email,
+            mask_email(customer_email),
         )
         print("[booking-email:mock] subject ->", subject)
         return "mock"
@@ -141,7 +149,7 @@ async def send_booking_confirmation_email(booking: dict) -> str:
 
         print(
             "[booking-email:sent] confirmation ->",
-            customer_email,
+            mask_email(customer_email),
         )
         return "sent"
 

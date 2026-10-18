@@ -1,43 +1,16 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-
+/**
+ * Quiet scroll reveal. Pure CSS (see `.reveal` in globals.css): content is always
+ * visible without JavaScript, in browsers without scroll-driven animation, and
+ * when the visitor prefers reduced motion.
+ */
 export default function Reveal({
   children,
   className = "",
-  delay = 0,
+  as: Tag = "div",
 }: {
   children: React.ReactNode;
   className?: string;
-  delay?: number;
+  as?: "div" | "section" | "li" | "header";
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.15 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-[900ms] ease-[cubic-bezier(.16,1,.3,1)] ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-9"
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
+  return <Tag className={`reveal ${className}`}>{children}</Tag>;
 }

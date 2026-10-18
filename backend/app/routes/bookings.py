@@ -139,13 +139,14 @@ async def update_booking(
             detail="Booking not found after update",
         )
 
+    out = BookingOut(**serialize(doc))
+
     if send_confirmation:
         email_result = await send_booking_confirmation_email(doc)
-        print(
-            f"[booking] confirmation email result: {email_result}"
-        )
+        print(f"[booking] confirmation email result: {email_result}")
+        out.confirmation_email = email_result
 
-    return BookingOut(**serialize(doc))
+    return out
 
 
 @router.delete("/{booking_id}")
