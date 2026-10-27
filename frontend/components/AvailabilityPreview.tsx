@@ -5,7 +5,7 @@ import { eventTypes } from "@/lib/data";
 
 export default function AvailabilityPreview() {
   const [form, setForm] = useState({ event_type: "", date: "", location: "", duration: "Full Day" });
-  const [result, setResult] = useState<{ status: string; note: string; date: string } | null>(null);
+  const [result, setResult] = useState<{ status: string; note?: string | null; date: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
